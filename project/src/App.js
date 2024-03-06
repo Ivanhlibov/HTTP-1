@@ -17,6 +17,7 @@ class App extends Component {
     largeImageURL: '',
     isLoading: false,
     showModal: false,
+    error: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -26,7 +27,7 @@ class App extends Component {
   }
 
   onChangeQuery = query => {
-    this.setState({ searchQuery: query, currentPage: 1, images: [] });
+    this.setState({ searchQuery: query, currentPage: 1, images: [], error: null });
   };
 
   fetchImages = () => {
@@ -43,7 +44,10 @@ class App extends Component {
           currentPage: prevState.currentPage + 1,
         }));
       })
-      .catch(error => console.log(error))
+      .catch(error => {
+        console.log('Error fetching images:', error);
+        this.setState({ error: 'Error fetching images' });
+      })
       .finally(() => {
         this.setState({ isLoading: false });
         window.scrollTo({
@@ -58,11 +62,12 @@ class App extends Component {
   };
 
   render() {
-    const { images, isLoading, showModal, largeImageURL } = this.state;
+    const { images, isLoading, showModal, largeImageURL, error } = this.state;
 
     return (
       <div>
         <Searchbar onSubmit={this.onChangeQuery} />
+        {error && <p>{error}</p>}
         <ImageGallery images={images} onImageClick={this.toggleModal} />
         {isLoading && <Loader />}
         {images.length > 0 && !isLoading && <Button onLoadMore={this.fetchImages} />}
